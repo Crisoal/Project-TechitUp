@@ -141,16 +141,34 @@ def chatbot_interface(username=None):
     st.write("This chatbot will assist you in learning coding concepts. Ask any programming-related questions, and let's get started!")
     st.markdown("[Click here for a coding challenge](https://edabit.com/challenges)")
     st.markdown("[Start a quiz](https://www.codeconquest.com/coding-quizzes/)")
-    user_input = st.text_input("Type your question here...")
-    if user_input:
+    
+    # Check if conversation exists in session state, otherwise initialize it as an empty list
+    if 'conversation' not in st.session_state:
+        st.session_state.conversation = []
+
+    # Display the conversation history
+    for item in st.session_state.conversation:
+        if item['role'] == 'user':
+            st.write(f"You: {item['content']}")
+        else:
+            st.write(f"Chatbot: {item['content']}")
+    
+    # Input field for the user's question
+    new_input = st.text_input("Type your question here...")
+
+    if new_input and new_input not in [item['content'] for item in st.session_state.conversation]:
+        st.session_state.conversation.append({'role': 'user', 'content': new_input})
         with sqlite3.connect('users.db') as conn:
             c = conn.cursor()
             c.execute("SELECT assessment_score FROM users WHERE username = ?", (username,))
             score = c.fetchone()[0]
             if score and score < 3:
-                user_input = f"beginner {user_input}"
+                new_input = f"beginner {new_input}"
         with st.spinner('Processing...'):
-            chatbot_response = get_gpt_response(user_input)
+            chatbot_response = get_gpt_response(new_input)
+        st.session_state.conversation.append({'role': 'chatbot', 'content': chatbot_response})
+
+        # Display the chatbot's immediate response
         st.write(f"Chatbot: {chatbot_response}")
 
 def feedback_page(username):
