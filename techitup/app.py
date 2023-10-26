@@ -135,8 +135,6 @@ def assessment_page(username):
         st.session_state.next_page = "Feedback"  # Indicate that the next page is Feedback
         st.experimental_rerun()
 
-
-
 def chatbot_interface(username=None):
     st.title("TechItUp AI-Powered Coding Learning Chatbot")
     st.write("Welcome to the TechItUp AI-powered coding learning chatbot!")
